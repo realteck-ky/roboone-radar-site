@@ -1,7 +1,7 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image'
-import styles from '../styles/Home.module.css'
+import type { NextPage } from 'next';
+import Head from 'next/head';
+import Image from 'next/image';
+import styles from '../styles/Home.module.css';
 import { FEEDS } from '../lib/rss';
 import Link from 'next/link';
 
@@ -19,13 +19,14 @@ const Home: NextPage = () => {
           Welcome to <a href="https://nextjs.org">Next.js!</a>
         </h1>
 
-
         <div className="px-6 py-12 max-w-xl mx-auto">
           <h1 className="font-bold text-5xl mb-12">Interesting RSS Feeds</h1>
           <div className="grid grid-cols-2 gap-4">
             {FEEDS.map((feed) => (
               <Link key={feed.slug} href={`/feeds/${feed.slug}`}>
-                <a className="p-4 border border-gray-200 hover:border-gray-500 rounded-lg">{feed.title}</a>
+                <p className="p-4 border border-gray-200 hover:border-gray-500 rounded-lg">
+                  {feed.page_title}
+                </p>
               </Link>
             ))}
           </div>
@@ -45,7 +46,7 @@ const Home: NextPage = () => {
         </a>
       </footer>
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
