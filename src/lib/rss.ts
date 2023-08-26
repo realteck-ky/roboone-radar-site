@@ -1,30 +1,28 @@
 import RSS from "rss-parser";
+import YAML from 'yaml';
+import path from 'path';
+import fs from 'fs';
 
-type Feed = {
+export type Feed = {
   slug: string;
   page_title: string;
   sites: Site[];
 }
 
-type Site = {
+export type Site = {
   url: string;
   title: string;
   author: string;
   rss: string;
 }
 
-export const FEEDS: Feed[] = [
-  {
-    slug: "roboone",
-    page_title: "ROBO-ONE",
-    sites: [{
-      title: "",
-      author: "",
-      rss: "http://ant.mtlab.jp/robo-one/rss/all.rdf",
-      url: "http://ant.mtlab.jp/robo-one/rss/all.rdf"
-    }]
-  }
-];
+export async function getSiteConfig(){
+  const filepath = path.join(process.cwd(),'sites.yaml');
+  const config = fs.readFileSync(filepath, 'utf8');
+  const docs: YAML.Document[] = YAML.parseAllDocuments(config);
+  const feeds: Feed[] = docs.map(d => d.toJS());
+  return feeds;
+}
 
 export async function getFeed(feedUrl: string) {
   const parser = new RSS();
