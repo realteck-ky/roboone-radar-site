@@ -1,27 +1,31 @@
-import { Feed, getSiteConfig, getFeed, Site } from '../../lib/rss';
-import { format } from 'date-fns';
+import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Card, Typography } from '@material-tailwind/react';
+import { format } from 'date-fns';
+
+import { getSiteConfig, getFeed, Site, Feed } from '../../lib/rss';
 
 type Data = {
   site: Site;
   item: any;
 };
 
-export async function getStaticPaths() {
-  const feeds = await getSiteConfig();
+export const getStaticPaths: GetStaticPaths = async () => {
+  const feeds = getSiteConfig();
   return {
     paths: feeds.map((feed) => ({ params: { slug: feed.slug } })),
     fallback: false,
   };
-}
+};
 
-export async function getStaticProps({ params }: any) {
-  const feeds = await getSiteConfig();
-  const feed = feeds.find((feed) => feed.slug === params.slug);
-  const sites = feed?.sites;
-
-  if (!sites) return;
+export const getStaticProps: GetStaticProps<{ feed: Feed; data: Data[] }> = async ({
+  params,
+}: any) => {
+  const feeds = getSiteConfig();
+  const nullfeed: Feed = { slug: params?.slug ?? '', page_title: '', sites: [] };
+  const feed = feeds.find((feed) => feed.slug === params?.slug) ?? nullfeed;
+  const sites = feed.sites;
 
   let data: Data[] = [];
   for (let site of sites) {
@@ -45,14 +49,27 @@ export async function getStaticProps({ params }: any) {
     }
   }
 
+  // Null contents check
+  data = data.filter((d: Data) => d.item.title && d.item.isoDate && d.item.link);
+
+  // Sort by date
+  data = data.sort((a: Data, b: Data) =>
+    new Date(a.item.isoDate) < new Date(b.item.isoDate) ? 1 : -1
+  );
+
+  // Filtered latest contents
+  // data = data.filter(
+  //   (x: Data, i: number, arr: Array<Data>) =>
+  //     arr.findIndex((y: Data) => y.site.author === x.site.author) === i
+  // );
+
   return {
     props: {
-      feed,
+      feed: feed,
       data: data,
     },
-    revalidate: 1,
   };
-}
+};
 
 function FeedGrid({ feed, data }: any) {
   return (
@@ -71,7 +88,7 @@ function FeedGrid({ feed, data }: any) {
               {/* {console.log(item)} */}
               <div className="grid grid-flow-row sm:grid-flow-col gap-4 p-5">
                 {item.enclosure?.url && (
-                  <img
+                  <Image
                     src={item.enclosure.url}
                     alt={item.title}
                     className="row-span-3 object-contain max-h-[20vh]"
@@ -89,21 +106,7 @@ function FeedGrid({ feed, data }: any) {
   );
 }
 
-export default function FeedTable({ feed, data }: any) {
-  // Null contents check
-  let data_feed = data.filter((d: Data) => d.item.title && d.item.isoDate && d.item.link);
-
-  // Sort by date
-  data_feed = data_feed.sort((a: Data, b: Data) =>
-    new Date(a.item.isoDate) < new Date(b.item.isoDate) ? 1 : -1
-  );
-
-  // Filtered latest contents
-  // data_feed = data_feed.filter(
-  //   (x: Data, i: number, arr: Array<Data>) =>
-  //     arr.findIndex((y: Data) => y.site.author === x.site.author) === i
-  // );
-
+export default function FeedTable({ feed, data }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
     <div>
       <h1 className="font-bold text-5xl mb-12 text-center">{feed.page_title}</h1>
@@ -125,7 +128,7 @@ export default function FeedTable({ feed, data }: any) {
             </tr>
           </thead>
           <tbody>
-            {data_feed.map(({ site, item }: Data, index: number) => (
+            {data.map(({ site, item }: Data, index: number) => (
               <tr className="p-4 border-b border-blue-gray-50" key={index}>
                 <td className="w-1/5">
                   <Typography variant="small" color="blue-gray" className="font-normal">

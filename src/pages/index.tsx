@@ -1,9 +1,10 @@
 import type { GetStaticProps, InferGetStaticPropsType } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
+import Link from 'next/link';
+
 import styles from '../styles/Home.module.css';
 import { getSiteConfig, Feed } from '../lib/rss';
-import Link from 'next/link';
 
 export const getStaticProps: GetStaticProps<{ feeds: Feed[] }> = async () => {
   const feeds: Feed[] = await getSiteConfig();

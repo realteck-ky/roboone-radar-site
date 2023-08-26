@@ -1,0 +1,5 @@
+[build]
+publish = "out"
+command = "npx next build"
+[build.environment]
+NETLIFY_NEXT_PLUGIN_SKIP = "true"

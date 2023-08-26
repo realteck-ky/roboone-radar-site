@@ -16,7 +16,7 @@ export type Site = {
   rss: string;
 }
 
-export async function getSiteConfig(){
+export function getSiteConfig(){
   const filepath = path.join(process.cwd(),'sites.yaml');
   const config = fs.readFileSync(filepath, 'utf8');
   const docs: YAML.Document[] = YAML.parseAllDocuments(config);
@@ -27,6 +27,5 @@ export async function getSiteConfig(){
 export async function getFeed(feedUrl: string) {
   const parser = new RSS();
   const feed = await parser.parseURL(feedUrl);
-
   return feed;
 }
